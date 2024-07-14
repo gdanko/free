@@ -19,3 +19,8 @@
 
 # Go workspace file
 go.work
+
+# Repo-specific stuff
+darwin/free
+linux/free
+*.tgz
