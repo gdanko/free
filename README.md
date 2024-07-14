@@ -16,15 +16,22 @@ Application Options:
       --mega     Show output in megabytes. Implies --si.
       --giga     Show output in gigabytes. Implies --si.
       --tera     Show output in terabytes. Implies --si.
+      --peta     Show output in petabytes. Implies --si.
+      --exa      Show output in exabytes. Implies --si.
   -k, --kibi     Show output in kibibytes.
   -m, --mebi     Show output in mebibytes.
   -g, --gibi     Show output in gibibytes.
   -t, --tebi     Show output in tebibytes.
+  -p, --pebi     Show output in pebibytes.
+  -e, --exbi     Show output in exbibytes.
   -j, --json     Output the data as JSON.
+  -y, --yaml     Output the data as YAML.
       --si       Use kilo, mega, giga, etc (power of 1000) instead of kibi, mebi, gibi (power of 1024).
+  -l, --lohi     Show detailed low and high memory statistics (Linux Only).
       --total    Show total for RAM + swap.
   -s, --seconds= Continuously display the result N seconds apart.
   -c, --count=   Display the result N times.
+  -w, --wide     Wide output (Linux Only).
   -V, --version  Output version information and exit.
 
 Help Options:
