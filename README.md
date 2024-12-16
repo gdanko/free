@@ -27,11 +27,9 @@ Application Options:
   -j, --json     Output the data as JSON.
   -y, --yaml     Output the data as YAML.
       --si       Use kilo, mega, giga, etc (power of 1000) instead of kibi, mebi, gibi (power of 1024).
-  -l, --lohi     Show detailed low and high memory statistics (Linux Only).
       --total    Show total for RAM + swap.
   -s, --seconds= Continuously display the result N seconds apart.
   -c, --count=   Display the result N times.
-  -w, --wide     Wide output (Linux Only).
   -V, --version  Output version information and exit.
 
 Help Options:

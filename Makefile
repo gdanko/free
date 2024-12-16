@@ -1,7 +1,7 @@
 GOPATH := $(shell go env GOPATH)
 GOOS := $(shell go env GOOS)
 GOARCH := $(shell go env GOARCH)
-FREE_VERSION := "0.3.2"
+FREE_VERSION := "0.3.3"
 
 GOOS ?= $(shell uname | tr '[:upper:]' '[:lower:]')
 GOARCH ?=$(shell arch)
@@ -32,7 +32,7 @@ clean:
 	@echo "================================================="
 	@echo "Cleaning free"
 	@echo "=================================================\n"
-	@for OS in darwin linux; do \
+	@for OS in darwin; do \
 		if [ -f $${OS}/free ]; then \
 			rm -f $${OS}/free; \
 		fi; \
