@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"runtime"
 
 	"strconv"
 	"strings"
@@ -19,7 +18,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const VERSION = "0.3.2"
+const VERSION = "0.3.3"
 
 var (
 	logger *lumber.ConsoleLogger
@@ -42,11 +41,9 @@ type Options struct {
 	Json    bool   `short:"j" long:"json" description:"Output the data as JSON."`
 	Yaml    bool   `short:"y" long:"yaml" description:"Output the data as YAML."`
 	Si      bool   `long:"si" description:"Use kilo, mega, giga, etc (power of 1000) instead of kibi, mebi, gibi (power of 1024)."`
-	LoHi    bool   `short:"l" long:"lohi" description:"Show detailed low and high memory statistics (Linux Only)."`
 	Total   bool   `long:"total" description:"Show total for RAM + swap."`
 	Seconds int    `short:"s" long:"seconds" description:"Continuously display the result N seconds apart."`
 	Count   int    `short:"c" long:"count" description:"Display the result N times."`
-	Wide    bool   `short:"w" long:"wide" description:"Wide output (Linux Only)."`
 	Version func() `short:"V" long:"version" description:"Output version information and exit."`
 }
 
@@ -256,19 +253,10 @@ func displayOutput(opts Options, base, exponent float64, prefix string, memorySt
 	descriptor := prefix + "bytes"
 	divideBy := uint64(math.Pow(base, exponent))
 
-	highMemoryFree := highMemoryStats.Free / divideBy
-	highMemoryTotal := highMemoryStats.Total / divideBy
-	highMemoryUsed := highMemoryStats.Used / divideBy
-	lowMemoryFree := highMemoryStats.Free / divideBy
-	lowMemoryTotal := highMemoryStats.Total / divideBy
-	lowMemoryUsed := highMemoryStats.Used / divideBy
 	memActive := memoryStats.Active / divideBy
 	memAvailable := memoryStats.Available / divideBy
-	memBuffers := memoryStats.Buffers / divideBy
-	memCached := memoryStats.Cached / divideBy
 	memFree := memoryStats.Free / divideBy
 	memInactive := memoryStats.Inactive / divideBy
-	memShared := memoryStats.Shared / divideBy
 	memTotal := memoryStats.Total / divideBy
 	memUsed := memoryStats.Used / divideBy
 	memWired := memoryStats.Wired / divideBy
@@ -281,33 +269,15 @@ func displayOutput(opts Options, base, exponent float64, prefix string, memorySt
 		"free":      strconv.Itoa(int(memFree)),
 		"used":      strconv.Itoa(int(memUsed)),
 		"total":     strconv.Itoa(int(memTotal)),
-	}
-	if runtime.GOOS == "darwin" {
-		memoryOut["active"] = strconv.Itoa(int(memActive))
-		memoryOut["inactive"] = strconv.Itoa(int(memInactive))
-		memoryOut["wired"] = strconv.Itoa(int(memWired))
-	} else if runtime.GOOS == "linux" {
-		memoryOut["buffers"] = strconv.Itoa(int(memBuffers))
-		memoryOut["cache"] = strconv.Itoa(int(memCached))
-		memoryOut["shared"] = strconv.Itoa(int(memShared))
+		"active":    strconv.Itoa(int(memActive)),
+		"inactive":  strconv.Itoa(int(memInactive)),
+		"wired":     strconv.Itoa(int(memWired)),
 	}
 
 	swapOut := map[string]string{
 		"total": strconv.Itoa(int(swapTotal)),
 		"used":  strconv.Itoa(int(swapUsed)),
 		"free":  strconv.Itoa(int(swapFree)),
-	}
-
-	lowMemoryOut := map[string]string{
-		"total": strconv.Itoa(int(lowMemoryTotal)),
-		"used":  strconv.Itoa(int(lowMemoryUsed)),
-		"free":  strconv.Itoa(int(lowMemoryFree)),
-	}
-
-	highMemoryOut := map[string]string{
-		"total": strconv.Itoa(int(highMemoryTotal)),
-		"used":  strconv.Itoa(int(highMemoryUsed)),
-		"free":  strconv.Itoa(int(highMemoryFree)),
 	}
 
 	totalsOut := map[string]string{
@@ -333,55 +303,17 @@ func displayOutput(opts Options, base, exponent float64, prefix string, memorySt
 		fmt.Println(yamlText)
 
 	} else {
-		if runtime.GOOS == "darwin" {
-			fmt.Printf("  %18s %11s %11s %11s %11s %11s %11s\n", "total", "used", "free", "active", "inactive", "wired", "available")
-			fmt.Printf("Mem:     %11s %11s %11s %11s %11s %11s %11s\n",
-				memoryOut["total"],
-				memoryOut["used"],
-				memoryOut["free"],
-				memoryOut["active"],
-				memoryOut["inactive"],
-				memoryOut["wired"],
-				memoryOut["available"],
-			)
-		} else if runtime.GOOS == "linux" {
-			if opts.Wide {
-				fmt.Printf("  %18s %11s %11s %11s %11s %11s %11s\n", "total", "used", "free", "shared", "buffers", "cache", "available")
-				fmt.Printf("Mem:     %11s %11s %11s %11s %11s %11s %11s\n",
-					memoryOut["total"],
-					memoryOut["used"],
-					memoryOut["free"],
-					memoryOut["shared"],
-					memoryOut["buffers"],
-					memoryOut["cache"],
-					memoryOut["available"],
-				)
-			} else {
-				memBuffCache := memBuffers + memCached
-				fmt.Printf("  %18s %11s %11s %11s %11s %11s\n", "total", "used", "free", "shared", "buff/cache", "available")
-				fmt.Printf("Mem:     %11s %11s %11s %11s %11s %11s\n",
-					memoryOut["total"],
-					memoryOut["used"],
-					memoryOut["free"],
-					memoryOut["shared"],
-					strconv.Itoa(int(memBuffCache)),
-					memoryOut["available"],
-				)
-			}
+		fmt.Printf("  %18s %11s %11s %11s %11s %11s %11s\n", "total", "used", "free", "active", "inactive", "wired", "available")
+		fmt.Printf("Mem:     %11s %11s %11s %11s %11s %11s %11s\n",
+			memoryOut["total"],
+			memoryOut["used"],
+			memoryOut["free"],
+			memoryOut["active"],
+			memoryOut["inactive"],
+			memoryOut["wired"],
+			memoryOut["available"],
+		)
 
-			if opts.LoHi {
-				fmt.Printf("Low:    %12s %11s %11s\n",
-					lowMemoryOut["total"],
-					lowMemoryOut["used"],
-					lowMemoryOut["free"],
-				)
-				fmt.Printf("High:    %11s %11s %11s\n",
-					highMemoryOut["total"],
-					highMemoryOut["used"],
-					highMemoryOut["free"],
-				)
-			}
-		}
 		fmt.Printf("Swap:    %11s %11s %11s\n",
 			swapOut["total"],
 			swapOut["used"],
