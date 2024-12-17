@@ -23,9 +23,9 @@ build: guard-FREE_VERSION mod-tidy clean
 	@if [ ! -d "${GOOS}" ]; then \
 		mkdir "${GOOS}"; \
 	fi
-	GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${GOOS}/free"
+	GOOS=${GOOS} GOARCH=${GOARCH} go build -o "bin/free"
 	sleep 2
-	tar -C "${GOOS}" -czvf "free_${FREE_VERSION}_${GOOS}_${GOARCH}.tgz" free free.1; \
+	tar -czvf "free_${FREE_VERSION}_${GOOS}_${GOARCH}.tgz" ./bin ./share; \
 
 .PHONY: clean
 clean:
