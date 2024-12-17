@@ -21,5 +21,5 @@
 go.work
 
 # Repo-specific stuff
-darwin/free
+bin/free
 *.tgz

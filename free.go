@@ -18,7 +18,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const VERSION = "0.3.3"
+const VERSION = "0.3.4"
 
 var (
 	logger *lumber.ConsoleLogger
@@ -172,7 +172,7 @@ func getBaseExponent(opts Options) (base, exponent float64, abbreviation, prefix
 	return base, exponent, abbreviation, prefix
 }
 
-func gatherData() (memoryStats Memory, swapStats Swap, lowMemoryStats LowMemory, highMemoryStats HighMemory, totalStats Totals, err error) {
+func gatherData() (memoryStats Memory, swapStats Swap, totalStats Totals, err error) {
 	memoryInfo, _ := mem.VirtualMemory()
 	memoryStats = Memory{
 		Active:    memoryInfo.Active,
@@ -193,25 +193,13 @@ func gatherData() (memoryStats Memory, swapStats Swap, lowMemoryStats LowMemory,
 		Used:  memoryInfo.SwapTotal - memoryInfo.SwapFree,
 	}
 
-	lowMemoryStats = LowMemory{
-		Total: memoryInfo.LowTotal,
-		Free:  memoryInfo.LowFree,
-		Used:  memoryInfo.LowTotal - memoryInfo.LowFree,
-	}
-
-	highMemoryStats = HighMemory{
-		Total: memoryInfo.HighTotal,
-		Free:  memoryInfo.HighFree,
-		Used:  memoryInfo.HighTotal - memoryInfo.HighFree,
-	}
-
 	totalStats = Totals{
 		Total: memoryStats.Total + swapStats.Total,
 		Free:  memoryStats.Free + swapStats.Free,
 		Used:  memoryStats.Used + swapStats.Used,
 	}
 
-	return memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats, err
+	return memoryStats, swapStats, totalStats, err
 }
 
 func generateJSON(opts Options, memoryOut, swapOut, totalsOut map[string]string, descriptor string) (jsonText string, err error) {
@@ -249,7 +237,7 @@ func generateYAML(opts Options, memoryOut, swapOut, totalsOut map[string]string,
 	return yamlString, err
 }
 
-func displayOutput(opts Options, base, exponent float64, prefix string, memoryStats Memory, swapStats Swap, lowMemoryStats LowMemory, highMemoryStats HighMemory, totalStats Totals) {
+func displayOutput(opts Options, base, exponent float64, prefix string, memoryStats Memory, swapStats Swap, totalStats Totals) {
 	descriptor := prefix + "bytes"
 	divideBy := uint64(math.Pow(base, exponent))
 
@@ -353,20 +341,20 @@ func main() {
 	base, exponent, _, prefix := getBaseExponent(opts)
 
 	if opts.Seconds == 0 && opts.Count == 0 {
-		memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats, err := gatherData()
+		memoryStats, swapStats, totalStats, err := gatherData()
 		if err != nil {
 			logger.Error(err.Error())
 			os.Exit(1)
 		}
-		displayOutput(opts, base, exponent, prefix, memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats)
+		displayOutput(opts, base, exponent, prefix, memoryStats, swapStats, totalStats)
 	} else if opts.Seconds > 0 && opts.Count == 0 {
 		for {
-			memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats, err := gatherData()
+			memoryStats, swapStats, totalStats, err := gatherData()
 			if err != nil {
 				logger.Error(err.Error())
 				os.Exit(1)
 			}
-			displayOutput(opts, base, exponent, prefix, memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats)
+			displayOutput(opts, base, exponent, prefix, memoryStats, swapStats, totalStats)
 			fmt.Println()
 			time.Sleep(time.Duration(opts.Seconds) * time.Second)
 		}
@@ -376,12 +364,12 @@ func main() {
 			os.Exit(1)
 		}
 		for i := 1; i < opts.Count+1; i++ {
-			memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats, err := gatherData()
+			memoryStats, swapStats, totalStats, err := gatherData()
 			if err != nil {
 				logger.Error(err.Error())
 				os.Exit(1)
 			}
-			displayOutput(opts, base, exponent, prefix, memoryStats, swapStats, lowMemoryStats, highMemoryStats, totalStats)
+			displayOutput(opts, base, exponent, prefix, memoryStats, swapStats, totalStats)
 			if i != opts.Count {
 				fmt.Println()
 				time.Sleep(time.Duration(opts.Seconds) * time.Second)
