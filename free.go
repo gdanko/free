@@ -251,6 +251,9 @@ func displayOutput(opts Options, base, exponent float64, prefix string, memorySt
 	swapFree := swapStats.Free / divideBy
 	swapTotal := swapStats.Total / divideBy
 	swapUsed := swapStats.Used / divideBy
+	totalsFree := totalStats.Free / divideBy
+	totalsTotal := totalStats.Total / divideBy
+	totalsUsed := totalStats.Used / divideBy
 
 	memoryOut := map[string]string{
 		"available": strconv.Itoa(int(memAvailable)),
@@ -269,9 +272,9 @@ func displayOutput(opts Options, base, exponent float64, prefix string, memorySt
 	}
 
 	totalsOut := map[string]string{
-		"total": strconv.Itoa(int(memTotal) + int(swapTotal)),
-		"used":  strconv.Itoa(int(memUsed) + int(swapUsed)),
-		"free":  strconv.Itoa(int(memFree) + int(swapFree)),
+		"total": strconv.Itoa(int(totalsTotal)),
+		"used":  strconv.Itoa(int(totalsUsed)),
+		"free":  strconv.Itoa(int(totalsFree)),
 	}
 
 	if opts.Json {
